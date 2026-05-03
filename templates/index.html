@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Мои котики</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="logo">🐾 Мои котики</span>
+      </div>
+      <nav class="nav">
+        <button class="nav-btn active" data-view="dashboard" onclick="showView('dashboard')">
+          <span class="nav-icon">🔔</span> Напоминания
+        </button>
+        <button class="nav-btn" data-view="cats" onclick="showView('cats')">
+          <span class="nav-icon">🐱</span> Мои коты
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+      <!-- Dashboard view -->
+      <section id="view-dashboard" class="view active">
+        <div class="page-header">
+          <h1>Напоминания</h1>
+          <span class="subtitle" id="reminder-count"></span>
+        </div>
+        <div id="reminders-list" class="reminders-list"></div>
+      </section>
+
+      <!-- Cats view -->
+      <section id="view-cats" class="view">
+        <div class="page-header">
+          <h1>Мои коты</h1>
+          <button class="btn btn-primary" onclick="openCatModal()">+ Добавить кота</button>
+        </div>
+        <div id="cats-grid" class="cats-grid"></div>
+      </section>
+
+      <!-- Cat detail view -->
+      <section id="view-cat-detail" class="view">
+        <div class="page-header">
+          <button class="btn btn-back" onclick="showView('cats')">← Назад</button>
+          <div class="cat-detail-title">
+            <span id="detail-emoji" class="detail-emoji"></span>
+            <h1 id="detail-name"></h1>
+          </div>
+          <button class="btn btn-primary" onclick="openRecordModal()">+ Добавить запись</button>
+        </div>
+        <div id="cat-info" class="cat-info-bar"></div>
+        <div id="records-list" class="records-list"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal: Cat -->
+  <div id="modal-cat" class="modal-overlay" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="cat-modal-title">Добавить кота</h2>
+        <button class="modal-close" onclick="closeModal('modal-cat')">✕</button>
+      </div>
+      <form id="cat-form" onsubmit="saveCat(event)">
+        <input type="hidden" id="cat-id" />
+        <div class="form-row">
+          <label>Имя *</label>
+          <input type="text" id="cat-name" required placeholder="Мурзик" />
+        </div>
+        <div class="form-row">
+          <label>Порода</label>
+          <input type="text" id="cat-breed" placeholder="Мейн-кун" />
+        </div>
+        <div class="form-row">
+          <label>Дата рождения</label>
+          <input type="date" id="cat-birthdate" />
+        </div>
+        <div class="form-row">
+          <label>Эмодзи</label>
+          <div class="emoji-picker">
+            <span class="emoji-opt" onclick="selectEmoji('🐱')">🐱</span>
+            <span class="emoji-opt" onclick="selectEmoji('🐈')">🐈</span>
+            <span class="emoji-opt" onclick="selectEmoji('🐈‍⬛')">🐈‍⬛</span>
+            <span class="emoji-opt" onclick="selectEmoji('😺')">😺</span>
+            <span class="emoji-opt" onclick="selectEmoji('😸')">😸</span>
+            <span class="emoji-opt" onclick="selectEmoji('🦁')">🦁</span>
+            <span class="emoji-opt" onclick="selectEmoji('🐯')">🐯</span>
+            <span class="emoji-opt" onclick="selectEmoji('🐻')">🐻</span>
+          </div>
+          <input type="hidden" id="cat-emoji" value="🐱" />
+          <span id="emoji-preview" class="emoji-preview">🐱</span>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn" onclick="closeModal('modal-cat')">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Record -->
+  <div id="modal-record" class="modal-overlay" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="record-modal-title">Добавить запись</h2>
+        <button class="modal-close" onclick="closeModal('modal-record')">✕</button>
+      </div>
+      <form id="record-form" onsubmit="saveRecord(event)">
+        <input type="hidden" id="record-id" />
+        <input type="hidden" id="record-cat-id" />
+        <div class="form-row">
+          <label>Тип *</label>
+          <select id="record-type" required>
+            <option value="vaccine">💉 Прививка</option>
+            <option value="flea">🦟 От блох/клещей</option>
+            <option value="worm">🪱 От глистов</option>
+            <option value="vet">🏥 Ветеринар</option>
+            <option value="other">📋 Другое</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Название *</label>
+          <input type="text" id="record-name" required placeholder="Nobivac, Advocate..." />
+        </div>
+        <div class="form-row">
+          <label>Дата проведения *</label>
+          <input type="date" id="record-done-date" required />
+        </div>
+        <div class="form-row">
+          <label>Следующая дата</label>
+          <input type="date" id="record-next-date" />
+        </div>
+        <div class="form-row">
+          <label>Заметки</label>
+          <textarea id="record-notes" rows="2" placeholder="Дозировка, реакция, врач..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn" onclick="closeModal('modal-record')">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm delete dialog -->
+  <div id="modal-confirm" class="modal-overlay" style="display:none">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2>Удалить?</h2>
+      </div>
+      <p id="confirm-text" class="confirm-text"></p>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal('modal-confirm')">Отмена</button>
+        <button class="btn btn-danger" id="confirm-ok-btn">Удалить</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
